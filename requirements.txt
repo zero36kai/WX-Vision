@@ -1,0 +1,38 @@
+# -*- coding: utf-8 -*-
+# WeChatVision 全项目依赖(感知+操作 / 引擎 / 服务端)。
+# 版本依据:docs/research/02-vision-stack.md §7(2026-10-23 PyPI 核对)。
+# 安装:pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+#
+# 环境注意(实机踩坑记录,2026-10-24 留档):
+# 1) 本机系统 MSVCP140.dll 若为 14.22 旧版,onnxruntime 导入即 access violation;
+#    需先安装微软最新 VC++ 2015-2022 运行库(x64):
+#    https://aka.ms/vs/17/release/vc_redist.x64.exe
+# 2) opencv-python 与 opencv-python-headless 不可共存(cv2 文件互踩 → 段错误),
+#    rapidocr 3.x 依赖 headless,若 pip 同时装上两套,需卸载其一保留单套。
+#
+# 依赖清理说明(2026-10-24,grep 全项目复核):
+# 已删除全项目无任何 import 的包:human-mouse、scipy、pydirectinput-rgx、pywinauto。
+# 新增 websockets(uvicorn 的 WebSocket 协议实现,/ws/logs 实时日志必需)。
+
+# ==== 感知:截屏 ====
+mss==10.2.0                    # 主截屏回退方案(30~60FPS,纯 ctypes)
+Pillow==13.0.0                 # 图像编解码兜底(requires Py>=3.11)
+
+# ==== 感知:OCR(RapidOCR + onnxruntime CPU)====
+rapidocr==3.10.0               # PP-OCR 系 ONNX 封装;boxes/txts/scores 原生输出
+onnxruntime==1.31.0            # CPU 版即默认 pip 包(requires Py>=3.11)
+
+# ==== 定位:模板匹配 ====
+opencv-python==5.0.0.93        # matchTemplate/HSV/findContours
+numpy>=2.0                     # opencv-python 5.x 在 Py>=3.9 要求 numpy>=2
+
+# ==== 行动:仿真人输入 ====
+pyautogui==0.9.54              # 基础键鼠(虚拟键码);PAUSE=0 + FAILSAFE 保持开启
+pyperclip==1.11.0              # 中文消息:写剪贴板 + Ctrl+V 粘贴
+pynput==1.8.2                  # 急停热键监听(ARCHITECTURE §1 定稿;引擎急停使用;LGPL-3.0 注意合规)
+
+# ==== 后端与 HTTP 客户端(ARCHITECTURE §1 定稿)====
+fastapi==0.161.1               # 后端 API + WebSocket
+uvicorn==0.54.0                # ASGI 服务器
+websockets==17.3               # uvicorn 的 WS 协议实现(/ws/logs 推送必需)
+httpx==0.28.1                  # agent 后端(openai/webhook)HTTP 客户端

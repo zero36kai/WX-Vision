@@ -1,0 +1,103 @@
+{
+  "_note": "配置模板:复制本文件为 config.json 后按需修改。web.password 留空 = 首次启动自动生成随机口令(写入 config.json 并在启动窗口醒目打印一次)。默认组合 = echo 后端 + 演练模式 + 不自动回复,开箱零发送。",
+  "web": {
+    "host": "127.0.0.1",
+    "port": 8765,
+    "password": ""
+  },
+  "agent": {
+    "mode": "echo",
+    "base_url": "https://api.deepseek.com",
+    "api_key": "",
+    "model": "deepseek-chat",
+    "system_prompt": "",
+    "temperature": 0.8,
+    "timeout_sec": 30.0,
+    "webhook_url": "",
+    "webhook_secret": "",
+    "max_reply_chars": 500,
+    "backends": [
+      {
+        "id": "echo",
+        "type": "echo",
+        "base_url": "",
+        "api_key": "",
+        "model": "",
+        "system_prompt": "",
+        "timeout_sec": 30.0,
+        "webhook_url": "",
+        "webhook_secret": "",
+        "max_reply_chars": 500
+      }
+    ],
+    "default_backend": "echo",
+    "routing": {}
+  },
+  "engine": {
+    "poll_interval_sec": 5.0,
+    "max_replies_per_contact_per_min": 3,
+    "context_window": 20,
+    "dry_run": true,
+    "auto_reply_enabled": false
+  },
+  "groups": {
+    "enabled": false,
+    "reply_mode": "off",
+    "whitelist": [],
+    "bot_names": [],
+    "allow_real_send": false
+  },
+  "mailbox": {
+    "retention_hours": 48,
+    "notify_url": ""
+  },
+  "human": {
+    "target_jitter_px": 3,
+    "pre_click_delay_ms": [120, 600],
+    "hold_duration_ms": [60, 180],
+    "hesitate_prob": 0.15,
+    "hesitate_delay_ms": [800, 2000],
+    "settling_delay_ms": [100, 400]
+  },
+  "allow_real_send": false,
+  "personas": {
+    "default": "你是用户的微信助手,回复简洁口语化,不超过100字。",
+    "overrides": {}
+  },
+  "safety": {
+    "auto_reply_enabled": false,
+    "whitelist": ["文件传输助手"],
+    "whitelist_mode": "strict",
+    "ignore_keywords": ["[转账]", "[红包]", "撤回了一条消息"],
+    "require_know_risk": true
+  },
+  "rate_limit": {
+    "global_qpm": 20,
+    "per_contact_qpm": 3,
+    "per_contact_cooldown_sec": 5.0,
+    "reply_delay_range_sec": [1.0, 3.0]
+  },
+  "context": {
+    "max_turns": 20,
+    "ttl_sec": 7200
+  },
+  "capture": {
+    "poll_interval_sec": 2.5,
+    "dedup_cache_size": 200,
+    "dedup_ttl_sec": 600,
+    "ocr_min_conf": 0.5,
+    "printwindow_first": true
+  },
+  "send": {
+    "type_delay_ms": [50, 150],
+    "send_retries": 2,
+    "send_key": "button"
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "logs/bot.log",
+    "max_bytes": 10485760,
+    "backup_count": 5,
+    "ws_buffer": 500
+  }
+}

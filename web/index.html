@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>微信助手控制台(WeChatVision)</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <img class="logo" src="assets/logo.png" alt="微信助手徽标"
+      style="width:38px;height:38px;border-radius:50%;display:block;flex:none;">
+    <div>
+      <h1>微信助手控制台</h1>
+      <p class="sub">纯视觉 + 模拟真人操作</p>
+    </div>
+  </div>
+  <div id="modeBadge" class="badge badge-safe">演练模式(不真发)</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="status">① 状态</button>
+  <button class="tab" data-tab="logs">② 实时日志</button>
+  <button class="tab" data-tab="send">③ 手动发送</button>
+  <button class="tab" data-tab="config">④ 配置</button>
+  <button class="tab" data-tab="help">⑤ 帮助</button>
+</nav>
+
+<main>
+  <!-- ============ ① 状态 ============ -->
+  <section id="tab-status" class="panel active">
+    <div class="cards">
+      <div class="card" id="cardWindow">
+        <div class="card-head"><span class="card-icon">💬</span><h2>微信窗口</h2><span class="dot" id="dotWindow"></span></div>
+        <p class="card-main" id="windowMain">检测中…</p>
+        <p class="card-sub" id="windowSub"></p>
+      </div>
+      <div class="card" id="cardEngine">
+        <div class="card-head"><span class="card-icon">⚙️</span><h2>引擎</h2><span class="dot" id="dotEngine"></span></div>
+        <p class="card-main" id="engineMain">检测中…</p>
+        <p class="card-sub" id="engineSub"></p>
+      </div>
+      <div class="card" id="cardAgent">
+        <div class="card-head"><span class="card-icon">🧠</span><h2>智能体</h2><span class="dot" id="dotAgent"></span></div>
+        <p class="card-main" id="agentMain">检测中…</p>
+        <p class="card-sub" id="agentSub"></p>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">引擎开关</div>
+      <p class="hint">启动后每几秒看一眼微信有没有新消息(只对白名单里的联系人)。停止即完全不动微信。</p>
+      <div class="btn-row">
+        <button id="btnStart" class="btn btn-primary">▶ 启动引擎</button>
+        <button id="btnStop" class="btn btn-danger-outline" disabled>■ 停止引擎</button>
+        <button id="btnRefresh" class="btn btn-ghost">🔄 刷新状态</button>
+      </div>
+    </div>
+
+    <div class="box note-box">
+      <div class="box-title">🛑 紧急停止(急停)</div>
+      <p class="hint">发现鼠标键盘不听使唤时,把鼠标<b>快速甩到屏幕左上角</b>,所有自动操作会立即停下(这层保护始终开启,无需设置)。停下后回到本页点「停止引擎」即可。</p>
+    </div>
+  </section>
+
+  <!-- ============ ② 实时日志 ============ -->
+  <section id="tab-logs" class="panel">
+    <div class="logbar">
+      <span class="ws-dot" id="wsDot"></span><span id="wsState">日志连接中…</span>
+      <span class="spacer"></span>
+      <label class="chk"><input type="checkbox" id="fInfo" checked> 信息</label>
+      <label class="chk"><input type="checkbox" id="fWarn" checked> 警告</label>
+      <label class="chk"><input type="checkbox" id="fErr" checked> 错误</label>
+      <button id="btnPause" class="btn btn-ghost btn-sm">⏸ 暂停滚动</button>
+      <button id="btnClear" class="btn btn-ghost btn-sm">🧹 清屏</button>
+      <span id="logCount" class="muted"></span>
+    </div>
+    <div id="logBox" class="logbox" tabindex="0"></div>
+    <p class="hint">最多保留最近 500 条(更早的自动丢弃);日志同时写入 logs/bot.log 文件。</p>
+  </section>
+
+  <!-- ============ ③ 手动发送 ============ -->
+  <section id="tab-send" class="panel">
+    <div id="sendBanner" class="banner banner-warn">
+      当前处于<b>演练模式</b>:点「演练发送」只会把"要发什么"记进日志,不会真的发出消息。
+    </div>
+    <div class="box">
+      <div class="box-title">以你的身份给白名单联系人发一条消息</div>
+      <label class="fld-label">发给谁(仅白名单成员可选)</label>
+      <select id="sendTarget" class="input"></select>
+      <label class="fld-label">消息内容</label>
+      <textarea id="sendText" class="input" rows="5" maxlength="2000"
+        placeholder="输入要发送的内容…(最多 2000 字)"></textarea>
+      <p class="hint"><span id="sendCount">0</span>/2000 字</p>
+      <div class="btn-row">
+        <button id="btnSend" class="btn btn-primary" disabled>✉️ 发送</button>
+        <button id="btnReloadTargets" class="btn btn-ghost">🔄 重新读取白名单</button>
+      </div>
+      <div id="sendResult" class="result hidden"></div>
+    </div>
+    <div class="box note-box">
+      <div class="box-title">为什么只能选白名单里的人?</div>
+      <p class="hint">这是本工具的安全红线:发送前引擎还会自动核对当前聊天窗口的名字就是所选联系人,对不上立即停下,防止发错人。</p>
+    </div>
+  </section>
+
+  <!-- ============ ④ 配置 ============ -->
+  <section id="tab-config" class="panel">
+    <p class="hint">看不懂的字段保持默认即可。保存前会自动备份旧配置为 <code>config.json.bak</code>。</p>
+
+    <div class="box danger-box">
+      <div class="box-title danger">🚨 安全与白名单(动这里前请想清楚)</div>
+      <label class="fld-label">联系人白名单(每行一个,机器人只跟这些联系人收发消息)</label>
+      <textarea id="cfgWhitelist" class="input input-danger" rows="3" spellcheck="false"
+        placeholder="示例:文件传输助手"></textarea>
+      <p class="hint">填聊天窗口显示的名字:备注优先,没有备注则填对方昵称。</p>
+      <label class="fld-label">发送模式(二选一,保存后立即生效)</label>
+      <label class="chk"><input type="radio" name="sendMode" id="modeDry" value="dry" checked>
+        🧪 演练模式(默认,绝不真发)——所有要发的消息只记进日志,不动鼠标键盘</label>
+      <label class="chk chk-danger"><input type="radio" name="sendMode" id="modeReal" value="real">
+        ⚠️ 允许真实发送——可能以你的身份真实发消息(仍仅限白名单,发送前自动核对窗口名字)</label>
+      <p class="hint">两层保险:第一层是<b>发送模式二选一</b>,永远不会出现「又演练又真实」的状态;第二层是<b>白名单 + 发送前自动核对聊天窗口名字</b>。只要保持演练模式,就绝不会发出任何消息。</p>
+      <label class="chk"><input type="checkbox" id="cfgAutoReply">
+        开启自动回复——检测到白名单联系人的新消息时,让智能体自动回复</label>
+      <label class="chk"><input type="checkbox" id="cfgKnowRisk">
+        我已知晓风险:自动回复会用我的身份给白名单联系人发消息</label>
+      <label class="fld-label">忽略关键词(消息里含这些词就不理会,每行一个)</label>
+      <textarea id="cfgIgnore" class="input" rows="2" spellcheck="false"></textarea>
+    </div>
+
+    <div class="box">
+      <div class="box-title">👥 群聊(默认全关)</div>
+      <label class="chk"><input type="checkbox" id="cfgGroupsEnabled">
+        启用群聊——默认关闭;不开就完全不打开、不读取任何群聊</label>
+      <label class="fld-label">回复模式</label>
+      <select id="cfgGroupMode" class="input">
+        <option value="off">不回复(默认,连群都不会打开)</option>
+        <option value="at">有人 @机器人 时才回复</option>
+        <option value="all">所有成员的消息都回(慎用,容易刷屏)</option>
+      </select>
+      <label class="fld-label">群白名单(每行一个群名;不在名单的群一律忽略)</label>
+      <textarea id="cfgGroupWhitelist" class="input" rows="2" spellcheck="false"></textarea>
+      <label class="fld-label">机器人昵称(每行一个;群友 @ 这个名字才会触发回复;留空 = 任何 @ 都算)</label>
+      <textarea id="cfgGroupBotNames" class="input" rows="2" spellcheck="false"></textarea>
+      <p class="hint">⚠️ 群聊默认不会真发消息:即使选了「有人 @机器人 时才回复」或「所有人都回」,也只会把"想回什么"记进日志。要让群聊真发,得同时满足:已启用群聊、群在群白名单里、再手动到 config.json 打开群聊真实发送开关(本页不提供这个开关,慎开)。另外,群消息识别按微信 4.x 常见界面实现,还没在真实群聊里充分验证,第一次使用请盯着日志确认识别是否正常。</p>
+    </div>
+
+    <div class="box">
+      <div class="box-title">🔑 访问口令(远程访问与本机登录)</div>
+      <label class="fld-label">新口令(留空 = 不修改;建议 ≥12 位随机字符)</label>
+      <input id="cfgNewPwd" class="input" type="password" autocomplete="off" placeholder="••••••••">
+      <label class="fld-label">再输入一遍确认</label>
+      <input id="cfgNewPwd2" class="input" type="password" autocomplete="off" placeholder="再次输入新口令">
+      <p class="hint">这个口令用来登录本页面:在自己电脑上打开要输,从外网远程访问也要输。修改后立即生效,其他已登录的浏览器会被要求重新登录。</p>
+    </div>
+
+    <div class="box">
+      <div class="box-title">🧠 智能体后端(决定消息由谁来回,可配多个)
+        <button id="btnHealthcheck" class="btn btn-ghost btn-sm" style="float:right">🔌 测试连接</button></div>
+      <p class="hint">每个后端就是一个「回复来源」,四类任选:echo(回声测试,不用填配置)/ openai(接 GLM、DeepSeek 等 AI)/ webhook(接你自己常驻在线的服务)/ mailbox(信箱,接 Muse)。</p>
+      <div id="backendList"></div>
+      <div class="btn-row" style="margin-top:10px">
+        <button id="btnAddBackend" class="btn btn-ghost btn-sm">➕ 添加后端</button>
+      </div>
+      <label class="fld-label">默认后端(路由表没提到的联系人都用它)</label>
+      <select id="cfgDefaultBackend" class="input"></select>
+      <p class="hint">删除后端前,先确认下方路由表没有联系人指向它(否则保存会被拒绝)。</p>
+    </div>
+
+    <div class="box">
+      <div class="box-title">🧭 按联系人路由(谁的消息交给谁回)</div>
+      <p class="hint">联系人填<b>聊天窗口显示的名字:备注优先,无备注填昵称</b>(与白名单同规则)。
+路由表里没有的联系人一律走「默认后端」;指向不存在后端的路由会被<b>拒绝保存</b>。</p>
+      <div id="routingList"></div>
+      <p id="routingEmpty" class="hint">还没有路由规则:目前所有联系人都走默认后端。</p>
+      <div class="btn-row" style="margin-top:10px">
+        <button id="btnAddRouting" class="btn btn-ghost btn-sm">➕ 添加路由</button>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">⏱ 节奏与频率(防刷屏、防封号)</div>
+      <div class="grid2">
+        <div><label class="fld-label">检查新消息间隔(秒)</label>
+          <input id="cfgPoll" class="input" type="number" step="0.5" min="0.5"></div>
+        <div><label class="fld-label">每人每分钟最多自动回几条</label>
+          <input id="cfgQpm" class="input" type="number" step="1" min="1"></div>
+        <div><label class="fld-label">回复前随机等待:最短(秒)</label>
+          <input id="cfgDelayLo" class="input" type="number" step="0.5" min="0"></div>
+        <div><label class="fld-label">回复前随机等待:最长(秒)</label>
+          <input id="cfgDelayHi" class="input" type="number" step="0.5" min="0"></div>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">📋 其他</div>
+      <div class="grid2">
+        <div><label class="fld-label">日志级别</label>
+          <select id="cfgLogLevel" class="input">
+            <option value="DEBUG">DEBUG(最啰嗦)</option>
+            <option value="INFO">INFO(推荐)</option>
+            <option value="WARNING">WARNING(只看警告)</option>
+          </select></div>
+        <div><label class="fld-label">OCR 识别门槛(0~1,调低更容易认错字,建议保持默认 0.5)</label>
+          <input id="cfgOcrConf" class="input" type="number" step="0.05" min="0" max="1"></div>
+      </div>
+    </div>
+
+    <div class="btn-row sticky-actions">
+      <button id="btnSaveCfg" class="btn btn-primary">💾 保存配置</button>
+      <button id="btnReloadCfg" class="btn btn-ghost">↩️ 放弃修改,重新读取</button>
+      <span class="hint">改了智能体后端或检查频率的,要「停止引擎 → 启动引擎」才会生效。</span>
+    </div>
+    <div id="cfgErrors" class="result hidden"></div>
+  </section>
+
+  <!-- ============ ⑤ 帮助 ============ -->
+  <section id="tab-help" class="panel">
+    <div class="box">
+      <div class="box-title">🚀 三步上手</div>
+      <ol class="steps">
+        <li>安装依赖(只需一次):命令行里执行 <code>pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt</code></li>
+        <li>登录电脑版微信,然后在项目文件夹执行 <code>python run.py</code></li>
+        <li>浏览器会自动打开本页面。先看「① 状态」:三个卡片都绿了再谈下一步。</li>
+      </ol>
+    </div>
+    <div class="box">
+      <div class="box-title">✅ 首次自检清单</div>
+      <ol class="steps">
+        <li>「微信窗口」显示已找到 —— 没找到就登录微信、别最小化到托盘;</li>
+        <li>保持默认 <b>echo 模式 + 演练模式</b>,点「启动引擎」,看「② 实时日志」滚动是否正常;</li>
+        <li>用手机给白名单联系人(默认为「文件传输助手」)发条消息,日志里应能看到引擎发现并"演练回复"(不真发);</li>
+        <li>一切正常后,想真发消息再去「④ 配置」把「发送模式」切成<b>「允许真实发送」</b>
+(切换和保存时都会再跟你确认一次,而且只能发给白名单里的人)。</li>
+      </ol>
+    </div>
+    <div class="box">
+      <div class="box-title">❓ 常见问题</div>
+      <dl class="faq">
+        <dt>微信窗口显示"未找到"?</dt>
+        <dd>请登录电脑版微信 4.x 并让主界面处于打开状态。最小化到托盘也没关系,引擎启动后会自动恢复窗口。</dd>
+        <dt>微信最小化了会影响吗?</dt>
+        <dd>不影响。引擎需要时会自动恢复窗口并置前(可能闪一下);不需要时你随意最小化。</dd>
+        <dt>日志里出现"空白壳/渲染未恢复"?</dt>
+        <dd>微信偶发"窗口在但一片空白",程序会自动按 Ctrl+Alt+W 反复尝试让微信自己重画,一般几秒内自愈,无需处理。</dd>
+        <dt>启动报错 MSVCP140.dll / onnxruntime?</dt>
+        <dd>先装微软 VC++ 2015-2022 运行库(x64):https://aka.ms/vs/17/release/vc_redist.x64.exe</dd>
+        <dt>OCR 第一次特别慢?</dt>
+        <dd>正常。OCR 模型首次加载要几秒到几十秒,之后会变快。</dd>
+        <dt>提示端口被占用?</dt>
+        <dd>用别的端口启动:<code>python run.py --port 8888</code>,然后手动访问 http://127.0.0.1:8888</dd>
+        <dt>浏览器没有自动打开?</dt>
+        <dd>手动在浏览器输入 http://127.0.0.1:8765(端口以命令行窗口显示为准)。</dd>
+        <dt>想给不同联系人用不同的 AI(或接入 Muse 信箱)?</dt>
+        <dd>「④ 配置 → 🧠 智能体后端」可添加多个后端(echo / openai / webhook / mailbox 四类),
+        「🧭 按联系人路由」指定某个联系人固定用哪个后端回复,路由表没有的联系人走「默认后端」;
+        接入 Muse 信箱用 <b>mailbox 类型后端卡片</b>(监听范围自动跟随白名单,无需单独配置;
+        卡片内有「接入指引」与归档保留时长,协议详见 docs/PROTOCOL.md)。</dd>
+      </dl>
+    </div>
+    <div class="box note-box">
+      <div class="box-title">🔒 安全须知(务必阅读)</div>
+      <ul class="steps">
+        <li><b>白名单机制</b>:机器人只跟白名单里的联系人(默认仅「文件传输助手」)收发消息,其他联系人的消息一律忽略;白名单可填多个联系人(每行一个);</li>
+        <li><b>群聊默认全关</b>:引擎默认不打开、不读取、不回复任何群聊;群聊的回复默认也只记日志不真发,要真发还需再满足几个条件(见「④ 配置 → 👥 群聊」),最后一个开关本页不提供;</li>
+        <li><b>发送模式二选一</b>:默认「演练模式」只把"将要发送什么"记进日志,不动鼠标键盘;切成「允许真实发送」才会真的发(程序内部保证开关永远一致,不会半真半假)。</li>
+        <li><b>急停</b>:鼠标快速甩到屏幕左上角,立即停下一切自动操作(详见「① 状态」页的紧急停止说明);</li>
+        <li><b>访问口令</b>:打开本页要先输口令,外网远程访问也一样;口令在程序第一次启动时自动生成(启动窗口会打印一次),可在「④ 配置」页修改;</li>
+        <li>本页面默认只有你这台电脑能打开,同一网络里的其他人访问不到;要从外网访问只能走 Cloudflare 隧道(需口令),请不要用别的方式把它暴露到网上;</li>
+        <li>请遵守微信使用规范,不要用来骚扰他人或群发广告。</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<!-- 🔒 访问口令登录框(口令缺失/错误/被修改时弹出;口令保存在浏览器 localStorage) -->
+<div id="loginMask" class="modal-mask hidden">
+  <div class="modal">
+    <h3>🔒 请输入访问口令</h3>
+    <div class="modal-body">本控制台已开启口令保护。口令在服务首次启动时自动生成
+(启动窗口会醒目打印一次,也写进了 config.json 的 web.password 字段),
+可在「④ 配置」页修改。通过公网隧道远程访问时同样使用这个口令。</div>
+    <input id="loginToken" class="input" type="password" autocomplete="off"
+      placeholder="访问口令" style="width:100%;margin-top:12px">
+    <div id="loginError" class="result err hidden" style="margin-top:10px"></div>
+    <div class="btn-row modal-actions">
+      <button id="loginOk" class="btn btn-primary">进入控制台</button>
+    </div>
+  </div>
+</div>
+
+<!-- 通用确认弹窗 -->
+<div id="modalMask" class="modal-mask hidden">
+  <div class="modal" id="modal">
+    <h3 id="modalTitle">确认操作</h3>
+    <div id="modalBody" class="modal-body"></div>
+    <div class="btn-row modal-actions">
+      <button id="modalCancel" class="btn btn-ghost">取消</button>
+      <button id="modalOk" class="btn btn-danger">确定</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts" class="toasts"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>

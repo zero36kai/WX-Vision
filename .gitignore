@@ -1,0 +1,30 @@
+# ===== 隐私与本地配置(发布到 GitHub 前务必确认本文件生效)=====
+# 运行时配置:含访问口令(web.password)与本机白名单等私有信息
+config.json
+config.json.bak
+*.bak
+
+# 运行日志与调试产物(含聊天截图/OCR 内容)
+logs/
+tests/_debug/
+*.log
+
+# 信箱运行时数据(含聊天内容:消息/媒体/投递队列,严禁入库)
+data/
+
+# 调研期真实聊天截图(不入库;对外截图放 docs/screenshots/ 为脱敏后的界面演示图)
+docs/research/screenshots/
+
+# 隧道配置与凭据(含 tunnel ID / 域名 / 凭据文件,泄露等同交出隧道控制权)
+cloudflared/
+
+# 工具会话目录
+.zcode/
+
+# Python 产物
+__pycache__/
+*.pyc
+
+# 系统/编辑器杂项
+.DS_Store
+Thumbs.db
