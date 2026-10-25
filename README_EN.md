@@ -1,20 +1,20 @@
 <p align="center">
-  <img src="web/assets/logo_256.png" width="160" alt="WeChatVision logo">
+  <img src="web/assets/logo_256.png" width="160" alt="WX-Vision logo">
 </p>
 
-# WeChatVision — Vision-Based WeChat Automation Assistant
+# WX-Vision — Vision-Based WX Automation Assistant
 
-A **pure-vision + human-like keyboard/mouse** automation assistant for the Windows WeChat client: it reads messages via screenshots + OCR, lets a pluggable agent draft replies, and sends them the way a human would — with the mouse and keyboard. Ships with a Chinese Web console; double-click and it runs.
+A **pure-vision + human-like keyboard/mouse** automation assistant for the Windows WX client: it reads messages via screenshots + OCR, lets a pluggable agent draft replies, and sends them the way a human would — with the mouse and keyboard. Ships with a Chinese Web console; double-click and it runs.
 
-- **Pure vision, no injection**: it only "looks at the screen" and "moves the pointer" — it never touches WeChat's process internals;
-- **Safe out of the box**: rehearsal mode by default (everything is logged, nothing is actually sent) + a whitelist (which contains only WeChat's built-in "File Transfer" contact by default);
+- **Pure vision, no injection**: it only "looks at the screen" and "moves the pointer" — it never touches WX's process internals;
+- **Safe out of the box**: rehearsal mode by default (everything is logged, nothing is actually sent) + a whitelist (which contains only WX's built-in "File Transfer" contact by default);
 - **Mailbox protocol**: implements the Muse Mailbox protocol v1, so any external program/agent can fetch messages and post replies over plain HTTP polling.
 
 > [!IMPORTANT]
 > ## Compliance & Disclaimer (please read before use)
-> - This project is for **personal study and research only**. Use it only with your own WeChat account and in lawful, compliant scenarios;
+> - This project is for **personal study and research only**. Use it only with your own WX account and in lawful, compliant scenarios;
 > - It must **not** be used for harassment, bulk messaging, marketing/spam, or automated friend-adding;
-> - Automating a real client carries a real risk of triggering **WeChat's risk control** (feature restrictions or even account suspension). You assume all consequences of using it;
+> - Automating a real client carries a real risk of triggering **WX's risk control** (feature restrictions or even account suspension). You assume all consequences of using it;
 > - By using this project you agree to comply with the WeChat Software License and Service Agreement. The developers are not responsible for any misuse.
 
 ---
@@ -44,8 +44,8 @@ A **pure-vision + human-like keyboard/mouse** automation assistant for the Windo
 What it explicitly does **not** do:
 
 - ❌ No DLL injection, no hooks, no memory reading;
-- ❌ No UIAutomation control tree (which WeChat 4.x barely exposes anyway);
-- ❌ No modification or replacement of any WeChat file;
+- ❌ No UIAutomation control tree (which WX 4.x barely exposes anyway);
+- ❌ No modification or replacement of any WX file;
 - ❌ No chat content is uploaded to any developer-owned server — only the agent backends **you configure yourself** (e.g., an LLM API with your own key) ever receive message text.
 
 ---
@@ -68,7 +68,7 @@ What it explicitly does **not** do:
 
 - Windows 10 / 11;
 - Python 3.11 or newer (developed on 3.12);
-- **WeChat 4.x** for Windows, logged in (main window open or minimized both work);
+- **WX 4.x** for Windows, logged in (main window open or minimized both work);
 - If importing onnxruntime fails with an MSVCP140.dll error, install the [Microsoft VC++ 2015-2022 Redistributable (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe) first.
 
 ### Step 1 — Install dependencies (once)
@@ -81,7 +81,7 @@ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 
 ### Step 2 — Launch
 
-With WeChat logged in, either:
+With WX logged in, either:
 
 - **Double-click `启动微信助手.vbs`** (recommended: no console window; double-clicking again never starts a second copy, it just reopens the console page; logs live under `logs/`);
 - or run from a terminal:
@@ -98,7 +98,7 @@ Common flags:
 | `python run.py --no-browser` | Do not auto-open the browser |
 | `python run.py --config D:\my.json` | Use a specific config file |
 
-To stop: double-click `停止微信助手.bat` (stops only this project's process; WeChat itself is untouched).
+To stop: double-click `停止微信助手.bat` (stops only this project's process; WX itself is untouched).
 
 ### Step 3 — Open the console
 
@@ -108,7 +108,7 @@ The console has 5 tabs: ① Status / ② Live Log / ③ Manual Send / ④ Config
 
 ### Step 4 — First-run self-check (recommended, in order)
 
-1. On the **Status** tab, check three cards: WeChat window "found"; engine "stopped" (expected); agent shows `current backend: echo · healthy`;
+1. On the **Status** tab, check three cards: WX window "found"; engine "stopped" (expected); agent shows `current backend: echo · healthy`;
 2. Keep the defaults (**echo mode + rehearsal mode**), click "Start Engine", and watch the Live Log tab scroll normally;
 3. From your phone, send a message to the whitelisted contact (by default the built-in "File Transfer" contact). The log should show: message received → agent invoked → rehearsal intent (nothing actually sent);
 4. When everything works and you want the bot to **actually** send: on the Config tab switch "Send mode" to "Allow real sending" (a mutually exclusive choice; switching and saving both ask for confirmation; only whitelisted contacts can ever receive messages).
@@ -123,7 +123,7 @@ Everything is editable in the Config tab of the Web console; every save auto-bac
 
 ### 4.1 Contact whitelist
 
-Config → "Safety & whitelist", **one contact per line** (names must match what WeChat displays — remark first, otherwise nickname). The bot only reads and sends for whitelisted contacts; by default the list contains only the built-in "File Transfer" contact. Messages from anyone else are ignored outright. Restart the engine after editing the list.
+Config → "Safety & whitelist", **one contact per line** (names must match what WX displays — remark first, otherwise nickname). The bot only reads and sends for whitelisted contacts; by default the list contains only the built-in "File Transfer" contact. Messages from anyone else are ignored outright. Restart the engine after editing the list.
 
 ### 4.2 Send mode (either/or, single choice)
 
@@ -211,14 +211,14 @@ Cheat sheet: `msg_id` is the only dedup key; messages with `is_from_me=true` are
 
 ## 7. FAQ
 
-**Q: The status page says "WeChat window not found"?**
-Log into WeChat 4.x for Windows and keep the main window available. Being minimized to the tray is fine; the engine restores the window automatically when needed.
+**Q: The status page says "WX window not found"?**
+Log into WX 4.x for Windows and keep the main window available. Being minimized to the tray is fine; the engine restores the window automatically when needed.
 
-**Q: Does a minimized WeChat break anything?**
+**Q: Does a minimized WX break anything?**
 No. The engine restores and foregrounds the window when it needs to (you may see a flash); minimize it freely otherwise.
 
 **Q: The log shows "blank shell / rendering not restored" or captures come out as solid color?**
-WeChat occasionally renders an empty window. The program presses `Ctrl+Alt+W` (WeChat's built-in show/hide hotkey) a few times so WeChat repaints itself; it usually recovers within seconds. Nothing to do.
+WX occasionally renders an empty window. The program presses `Ctrl+Alt+W` (WX's built-in show/hide hotkey) a few times so WX repaints itself; it usually recovers within seconds. Nothing to do.
 
 **Q: Startup fails with MSVCP140.dll / onnxruntime errors?**
 Install the Microsoft VC++ 2015-2022 Redistributable (x64): https://aka.ms/vs/17/release/vc_redist.x64.exe , then reopen the terminal. Also note `opencv-python` and `opencv-python-headless` must never be installed together (they clobber each other's cv2 and crash); if pip pulled in both, uninstall one.
@@ -240,7 +240,7 @@ Config → Agent backends → "Add backend", type `openai`, fill in base_url + A
 
 ---
 
-## 8. Development Self-Tests (fully offline — no WeChat interaction)
+## 8. Development Self-Tests (fully offline — no WX interaction)
 
 ```bash
 python tests/test_server.py          # server acceptance (last line SERVER_TEST_PASS = ok)
@@ -254,7 +254,7 @@ python tests/test_auth_failclosed.py # auth fail-closed hardening acceptance (AU
 python tests/test_safe_defaults.py   # factory-default regression: zero-send combination (SAFE_DEFAULTS_OK)
 node --check web/app.js              # frontend syntax check (needs Node.js; skip if unavailable)
 
-# Read-only on-machine acceptance (requires a logged-in WeChat; never sends, never touches the input box):
+# Read-only on-machine acceptance (requires a logged-in WX; never sends, never touches the input box):
 python tests/test_readonly.py        # target contact = env WECHAT_TEST_CONTACT → config whitelist[0] → fallback "File Transfer"
 ```
 
@@ -265,13 +265,13 @@ Exit code 0 means the suite passed. After code changes, at minimum run server / 
 ## 9. Project Layout
 
 ```
-WeChatVision/
+WX-Vision/
 ├── run.py                     # one-shot launcher: starts the service and opens the browser (rehearsal by default)
 ├── requirements.txt           # dependencies (pip install -r)
 ├── config.example.json        # config template (copy to config.json and edit)
 ├── 启动微信助手.bat            # silent launcher entry (delegates to the .vbs)
 ├── 启动微信助手.vbs            # recommended double-click launcher (no console window)
-├── 停止微信助手.bat            # stop the service (WeChat untouched)
+├── 停止微信助手.bat            # stop the service (WX untouched)
 ├── wxbot/                     # core package
 │   ├── config.py              # config load/save/validate/defaults
 │   ├── vision/                # window find & capture / OCR / region anchoring
@@ -300,7 +300,7 @@ Generated at runtime (all gitignored, never committed): `config.json` (runtime c
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Architecture & stack, module contracts, project hard rules |
 | [docs/PROTOCOL.md](docs/PROTOCOL.md) | Muse Mailbox protocol v1: endpoints, fields, dedup/retry/ack rules |
-| [docs/research/01-wechat-ui-flows.md](docs/research/01-wechat-ui-flows.md) | WeChat 4.x UI flow research (search / read / send / unread detection) |
+| [docs/research/01-wechat-ui-flows.md](docs/research/01-wechat-ui-flows.md) | WX 4.x UI flow research (search / read / send / unread detection) |
 | [docs/research/02-vision-stack.md](docs/research/02-vision-stack.md) | Capture / OCR / template matching / simulated input stack research |
 | [docs/research/03-agent-webui.md](docs/research/03-agent-webui.md) | Agent integration & local WebUI design research |
 | [README.md](README.md) | 中文说明(Chinese version of this document) |
